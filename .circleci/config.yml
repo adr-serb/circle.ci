@@ -6,12 +6,18 @@ jobs:
     steps:
       - checkout
       - run: pwd
+      - run: apt install maven &
+      - run: sleep 120
       - run: mvn package
       - run: echo "packaging complete"
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory
           root: target
           # Must be relative path from root
+      - save_cache:
+          key: test-cache
+          paths:
+            - "~/.m2"
 
   two:
     docker:
@@ -22,7 +28,8 @@ jobs:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: target
-
+      - restore_cache:
+          key: test-cache
       - run: java -cp target/circleci-1.0-SNAPSHOT.jar
 workflows:
   version: 2
